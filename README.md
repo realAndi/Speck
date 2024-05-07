@@ -1,12 +1,10 @@
 # Speck
 
-The NextJS Business Expenses tracking app
+The Expenses tracking and Group Saving app
 
 ## Description
 
-When you own 1 or 2 businesses, it's usually easy to keep tabs on your expenses with just a pen and paper. But the moment you grow and have an actual team, it gets a little confusing to track on your notebook. 
-
-Speck aims to be the optimal and minimalistic expenses tracker, with a goal to make it as easy as possible for you and your team to track your expenses. 
+Ever gone out with some friends, and one of you decide to pay for the bill? Maybe you guys decide to go somewhere else and somebody else handles the bill. Perhaps the 3rd guy paid for everyones Uber. And the 4th guy was a wild card. Calculating who owes what gets annoying and it isn't something we look forward to. Speck aims to make that issue go away by tracking and dividing expenses for you!
 
 ## To Do / Development Road Map:
 
