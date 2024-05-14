@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { UpdateIcon } from "@radix-ui/react-icons";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthContext } from '@/contexts/AuthContext';
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 
 // Define form validation schema using Zod
@@ -44,7 +45,7 @@ export const CreateOrgForm: React.FC = () => {
   const { toast } = useToast();
   const  user  = useAuthContext();
   const router = useRouter();
-
+  const functions = getFunctions();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,54 +67,36 @@ export const CreateOrgForm: React.FC = () => {
     setIsLoading(true);
   
     try {
-        const response = await fetch('/api/createOrganization', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-              orgName: values.orgName,
-              useCase: values.useCase,
-              createdBy: user,
-            }),
-          });
-          
-          if (!response.ok) {
-            const text = await response.text(); // Attempt to read response body as plain text
-            toast({
-              title: 'Error creating organization',
-              description: `An error occurred: ${text}`,
-              variant: 'destructive',
-            });
-            setIsLoading(false);
-            return;
-          }
-          
-          const data = await response.json();
-          const organizationId = data.organizationId;
-      
-          if (organizationId) {
-            toast({
-              title: 'Organization created successfully',
-              description: 'Your organization has been created.',
-              variant: 'default',
-            });
-            router.push(`/organization/${organizationId}`);
-          } else {
-            console.error('Organization ID is empty or undefined');
-          }
-          
+      const createOrganizationFunction = httpsCallable(functions, "createOrganization");
+      const result = await createOrganizationFunction({
+        orgName: values.orgName,
+        ownerId: user.uid,
+        useCase: values.useCase,
+      });
+
+      const organizationId = (result.data as { organizationId: string }).organizationId;
+      if (organizationId) {
+        toast({
+          title: "Organization created successfully",
+          description: "Your organization has been created.",
+          variant: "default",
+        });
+        router.push(`/organization/${organizationId}`);
+      } else {
+        console.error("Organization ID is empty or undefined");
+      }
     } catch (error) {
-      console.error('Error creating organization:', error);
+      console.error("Error creating organization:", error);
       toast({
-        title: 'Error creating organization',
-        description: 'An error occurred while creating the organization. Please try again.',
-        variant: 'destructive',
+        title: "Error creating organization",
+        description: "An error occurred while creating the organization. Please try again.",
+        variant: "destructive",
       });
     }
-  
+
     setIsLoading(false);
   };
+  
 
   return (
     <Form {...form}>

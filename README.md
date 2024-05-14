@@ -1,18 +1,28 @@
 # Speck
 
-The Expenses tracking and Group Saving app
+The Expense Tracking App that your friends need.
 
 ## Description
 
-Ever gone out with some friends, and one of you decide to pay for the bill? Maybe you guys decide to go somewhere else and somebody else handles the bill. Perhaps the 3rd guy paid for everyones Uber. And the 4th guy was a wild card. Calculating who owes what gets annoying and it isn't something we look forward to. Speck aims to make that issue go away by tracking and dividing expenses for you!
+Ever gone out with the boys and realized that everyone paid for different things during the night, week, or even month? If you're a broke guy in their 20s like me, then you know the pain of calculating everything, who owes who what and all that. Constant Zelle's and Venmo's to each other to ensure everyone is paid. It gets annoying, and usually put off for weeks. 
+
+Speck aims to solve this problem by simply calculating these expenses for you, as well as splitting for you!
+
+## Technologies used
+* NextJS
+* TailwindCSS
+* Firebase
+* shadCN
 
 ## To Do / Development Road Map:
 
-* Set up organization creation / joining
-* Set up expenses tracking
+* Set up organization joining
+* Fully set up expenses tracking
 * Make pretty graphs
 * Set up user roles per organization
 * Introduce user profiles
 * Pretty up everything
+* Calculate expense splitting
+* Optimize read requests
 
 

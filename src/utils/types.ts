@@ -1,27 +1,55 @@
-export type HeaderProps = {
-    isLoggedIn: boolean;
-    userFirstName: string;
-  };
+import { DocumentReference, Timestamp } from "firebase/firestore";
 
-export type AuthDialogProps = {
-    trigger: React.ReactNode;
-  };
+export interface HeaderProps {
+  isLoggedIn: boolean;
+  userFirstName: string;
+}
 
-export type CreateOrganizationDialogProps = {
-    trigger: React.ReactNode;
-  };
+export interface AuthDialogProps {
+  trigger: React.ReactNode;
+}
 
-  export interface Organization {
-    id?: number;
-    name: string;
-    owner_id: string;
-    useCase: string;
-  }
-  
-  export interface OrganizationMember {
-    id?: number;
-    user_id: string;
-    organization_id: number;
-    role: string;
-    joined_at: Date;
-  }
+export interface CreateOrganizationDialogProps {
+  trigger: React.ReactNode;
+}
+
+export interface Organization {
+  id: string;
+  name: string;
+  owner: string;
+  type: string;
+  description?: string;
+  groupPictureURL?: string;
+  createdAt?: Date;
+  expenses?: Expense[];
+  members?: OrganizationMember[];
+}
+
+export interface OrganizationMember {
+  id: string;
+  userId: string;
+  organizationId: string;
+  role: string;
+  joinedAt: Date;
+}
+
+export interface Expense {
+  id?: string;
+  title: string;
+  description?: string;
+  businessName?: string;
+  totalCost: number;
+  createdBy: string;
+  createdAt?: Timestamp;
+  user: User;
+}
+
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  avatarUrl?: string;
+  organizations?: DocumentReference[];
+  createdAt?: Timestamp;
+}
