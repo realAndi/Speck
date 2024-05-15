@@ -26,7 +26,6 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
         const { expenses, users, avatarUrls, timestamp } = JSON.parse(cachedData);
         console.log("Cached data found:", { expenses, users, avatarUrls, timestamp });
         if (now - timestamp < 60000) { // 1 minute = 60000 milliseconds
-          // Convert createdAt back to Date objects
           const deserializedExpenses = expenses.map((expense: Expense) => ({
             ...expense,
             createdAt: expense.createdAt ? 
@@ -49,7 +48,7 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
           id: doc.id,
           ...data,
           createdBy: data.createdBy.id, // Store the id of the createdBy reference
-          createdAt: data.createdAt ? data.createdAt.toMillis() : undefined, // Convert to milliseconds
+          createdAt: data.createdAt ? data.createdAt.toDate() : undefined, // Convert to Date object
         };
       }) as Expense[];
   
