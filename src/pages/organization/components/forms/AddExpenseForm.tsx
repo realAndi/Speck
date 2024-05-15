@@ -54,7 +54,6 @@ export const AddExpenseForm: React.FC<AddExpenseFormProps> = ({ organization, on
       title: "",
       description: "",
       businessName: "",
-      totalCost: 0,
     },
   });
 
@@ -151,6 +150,7 @@ export const AddExpenseForm: React.FC<AddExpenseFormProps> = ({ organization, on
                   </span>
                   <Input
                     type="number"
+                    placeholder="0.00"
                     step="0.01"
                     className="pl-7"
                     {...field}

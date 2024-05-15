@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { Expense, User } from "@/utils/types";
 import { getDocs, doc, getDoc, collection, Timestamp } from "firebase/firestore";
 import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
@@ -25,7 +26,14 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
         const { expenses, users, avatarUrls, timestamp } = JSON.parse(cachedData);
         console.log("Cached data found:", { expenses, users, avatarUrls, timestamp });
         if (now - timestamp < 60000) { // 1 minute = 60000 milliseconds
-          setExpenses(expenses);
+          // Convert createdAt back to Date objects
+          const deserializedExpenses = expenses.map((expense: Expense) => ({
+            ...expense,
+            createdAt: expense.createdAt ? 
+              (expense.createdAt instanceof Timestamp ? expense.createdAt.toDate() : new Date(expense.createdAt)) 
+              : undefined,
+          }));
+          setExpenses(deserializedExpenses);
           setUsers(users);
           setAvatarUrls(avatarUrls);
           console.log("Using cached data");
@@ -41,6 +49,7 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
           id: doc.id,
           ...data,
           createdBy: data.createdBy.id, // Store the id of the createdBy reference
+          createdAt: data.createdAt ? data.createdAt.toMillis() : undefined, // Convert to milliseconds
         };
       }) as Expense[];
   
@@ -98,47 +107,56 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
         return 0;
       }
     };
-  
+
     const createdAtA = getTimestamp(a.createdAt);
     const createdAtB = getTimestamp(b.createdAt);
-  
+
     return createdAtB - createdAtA;
   });
-
   
   return (
-    <>
-        {sortedExpenses.map((expense, index) => {
-          const user = users[expense.createdBy];
-          const avatarUrl = avatarUrls[expense.createdBy];
-          
-          if (!user) {
-            return null;
-          }
-          
-          return (
-            <React.Fragment key={expense.id}>
-              <div className="flex items-center">
-                <Avatar className="h-9 w-9">
-                  {avatarUrl ? (
-                    <AvatarImage src={avatarUrl} alt="Avatar" />
-                  ) : (
-                    <AvatarFallback>
-                      {user.firstName.charAt(0)}
-                      {user.lastName.charAt(0)}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none">{expense.title}</p>
-                  <p className="text-sm text-muted-foreground">{expense.description}</p>
-                </div>
-                <div className="ml-auto font-medium">${expense.totalCost.toFixed(2)}</div>
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold text-foreground">Recently Purchased</h2>
+      {sortedExpenses.map((expense, index) => {
+        const user = users[expense.createdBy];
+        const avatarUrl = avatarUrls[expense.createdBy];
+        
+        if (!user) {
+          return null;
+        }
+        
+        return (
+          <React.Fragment key={expense.id}>
+            <div className="flex items-center">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                  <Avatar className="h-10 w-10 transition-transform duration-200 hover:ring-2 hover:ring-blue-500 hover:scale-105">
+                      {avatarUrl ? (
+                        <AvatarImage src={avatarUrl} alt="Avatar" />
+                      ) : (
+                        <AvatarFallback>
+                          {user.firstName.charAt(0)}
+                          {user.lastName.charAt(0)}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-sm font-medium">{user.firstName} {user.lastName}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <div className="ml-4 space-y-1">
+                <p className="text-sm font-medium leading-none text-white">{expense.title}</p>
+                <p className="text-sm text-gray-400">{expense.description}</p>
               </div>
-              {index < sortedExpenses.length - 1 && <Separator className="my-4" />}
-            </React.Fragment>
-          );
-        })}
-    </>
+              <div className="ml-auto font-medium text-white">${expense.totalCost.toFixed(2)}</div>
+            </div>
+            {index < sortedExpenses.length - 1 && <Separator className="my-4" />}
+          </React.Fragment>
+        );
+      })}
+    </div>
   );
 };

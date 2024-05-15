@@ -36,7 +36,7 @@ yarn-error.log*
 next-env.d.ts
 
 # firebase
-speck/src/utils/firebase/firebase-config.js
+src/utils/firebase/firebase-config.js
 .firebaserc
 firebase.json
 firestore.rules

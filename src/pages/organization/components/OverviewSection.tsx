@@ -86,7 +86,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({ expenses, orga
           </CardContent>
         </Card>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="min-h-[500px] grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card>
           <CardContent>
             <RecentlyPurchasedChart />
