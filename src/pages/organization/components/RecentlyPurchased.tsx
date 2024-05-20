@@ -6,6 +6,7 @@ import { getDocs, doc, getDoc, collection, Timestamp } from "firebase/firestore"
 import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import { Separator } from "@/components/ui/separator";
 import { db } from "@/utils/firebase/firebase-config";
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 interface RecentlyPurchasedProps {
   organizationId: string;
@@ -16,15 +17,15 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
   const [avatarUrls, setAvatarUrls] = useState<{ [uid: string]: string | null }>({});
   const [expenses, setExpenses] = useState<Expense[]>([]);
 
+
   useEffect(() => {
     const fetchData = async () => {
       const cacheKey = `expenses_${organizationId}`;
       const cachedData = localStorage.getItem(cacheKey);
       const now = new Date().getTime();
-  
+
       if (cachedData) {
         const { expenses, users, avatarUrls, timestamp } = JSON.parse(cachedData);
-        console.log("Cached data found:", { expenses, users, avatarUrls, timestamp });
         if (now - timestamp < 60000) { // 1 minute = 60000 milliseconds
           const deserializedExpenses = expenses.map((expense: Expense) => ({
             ...expense,
@@ -35,12 +36,10 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
           setExpenses(deserializedExpenses);
           setUsers(users);
           setAvatarUrls(avatarUrls);
-          console.log("Using cached data");
           return;
         }
       }
-  
-      console.log("Fetching data from Firestore");
+
       const expensesSnapshot = await getDocs(collection(db, "organizations", organizationId, "expenses"));
       const fetchedExpenses: Expense[] = expensesSnapshot.docs.map((doc) => {
         const data = doc.data();
@@ -51,7 +50,7 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
           createdAt: data.createdAt ? data.createdAt.toDate() : undefined, // Convert to Date object
         };
       }) as Expense[];
-  
+
       const userIds = Array.from(new Set(fetchedExpenses.map((expense) => expense.createdBy)));
       const usersSnapshot = await Promise.all(
         userIds.map((userId) => getDoc(doc(db, "users", userId)))
@@ -63,7 +62,7 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
         }),
         {}
       );
-  
+
       const storage = getStorage();
       const avatarUrlsPromises = userIds.map(async (userId) => {
         const profileRef = ref(storage, `users/${userId}/profile`);
@@ -82,17 +81,19 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
         }),
         {}
       );
-  
+
       setExpenses(fetchedExpenses);
       setUsers(fetchedUsers);
       setAvatarUrls(fetchedAvatarUrls);
-  
-      localStorage.setItem(
-        cacheKey,
-        JSON.stringify({ expenses: fetchedExpenses, users: fetchedUsers, avatarUrls: fetchedAvatarUrls, timestamp: now })
-      );
+
+      localStorage.setItem(cacheKey, JSON.stringify({
+        expenses: fetchedExpenses,
+        users: fetchedUsers,
+        avatarUrls: fetchedAvatarUrls,
+        timestamp: now,
+      }));
     };
-  
+
     fetchData();
   }, [organizationId]);
 
@@ -114,7 +115,8 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
   });
   
   return (
-    <div className="space-y-4">
+    <ScrollArea>
+    <div className="p-4 space-y-4">
       <h2 className="text-lg font-semibold text-foreground">Recently Purchased</h2>
       {sortedExpenses.map((expense, index) => {
         const user = users[expense.createdBy];
@@ -157,5 +159,6 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
         );
       })}
     </div>
+    </ScrollArea>
   );
 };

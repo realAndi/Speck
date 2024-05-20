@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tabs";
 import { Organization, Expense, OrganizationMember } from "@/utils/types";
 import { OverviewSection } from "@/pages/organization/components/OverviewSection";
+import { SettingsSection } from "@/pages/organization/components/SettingsSection";
 import { getFirestore, doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { app, db } from '@/utils/firebase/firebase-config';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -126,7 +127,7 @@ export default function OrganizationAdminPanel() {
             {/* Add members list */}
         </TabsContent>
         <TabsContent value="settings" className="space-y-4">
-            {/* Add organization settings */}
+            <SettingsSection organizationId={organization.id}/>
         </TabsContent>
         </Tabs>
       </div>
