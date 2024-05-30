@@ -7,6 +7,10 @@ import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import { Separator } from "@/components/ui/separator";
 import { db } from "@/utils/firebase/firebase-config";
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { DotsVerticalIcon } from "@radix-ui/react-icons";
+import { useAuthContext } from '@/contexts/AuthContext';
+import { formatDate } from '@/utils/formatDate';
+import { CalculateExpenses } from "./dialogs/CalculateExpenses"; // Import the new component
 
 interface RecentlyPurchasedProps {
   organizationId: string;
@@ -16,7 +20,7 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
   const [users, setUsers] = useState<{ [uid: string]: User }>({});
   const [avatarUrls, setAvatarUrls] = useState<{ [uid: string]: string | null }>({});
   const [expenses, setExpenses] = useState<Expense[]>([]);
-
+  const { uid, isAuthenticated, isLoading } = useAuthContext(); // Get the authenticated user's UID
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,8 +50,9 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
         return {
           id: doc.id,
           ...data,
-          createdBy: data.createdBy.id, // Store the id of the createdBy reference
-          createdAt: data.createdAt ? data.createdAt.toDate() : undefined, // Convert to Date object
+          createdBy: data.createdBy.id,
+          createdAt: data.createdAt ? data.createdAt.toDate() : undefined,
+          paidOut: data.paidOut,
         };
       }) as Expense[];
 
@@ -116,49 +121,57 @@ export const RecentlyPurchased: React.FC<RecentlyPurchasedProps> = ({ organizati
   
   return (
     <ScrollArea>
-    <div className="p-4 space-y-4">
-      <h2 className="text-lg font-semibold text-foreground">Recently Purchased</h2>
-      {sortedExpenses.map((expense, index) => {
-        const user = users[expense.createdBy];
-        const avatarUrl = avatarUrls[expense.createdBy];
-        
-        if (!user) {
-          return null;
-        }
-        
-        return (
-          <React.Fragment key={expense.id}>
-            <div className="flex items-center">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                  <Avatar className="h-10 w-10 transition-transform duration-200 hover:ring-2 hover:ring-blue-500 hover:scale-105">
-                      {avatarUrl ? (
-                        <AvatarImage src={avatarUrl} alt="Avatar" />
-                      ) : (
-                        <AvatarFallback>
-                          {user.firstName.charAt(0)}
-                          {user.lastName.charAt(0)}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="text-sm font-medium">{user.firstName} {user.lastName}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              <div className="ml-4 space-y-1">
-                <p className="text-sm font-medium leading-none text-white">{expense.title}</p>
-                <p className="text-sm text-gray-400">{expense.description}</p>
+      <div className="p-4 space-y-4">
+        <h2 className="text-lg font-semibold text-foreground">Recently Purchased</h2>
+        {sortedExpenses.map((expense, index) => {
+          const user = users[expense.createdBy];
+          const avatarUrl = avatarUrls[expense.createdBy];
+
+          if (!user) {
+            return null;
+          }
+
+          return (
+            <React.Fragment key={expense.id}>
+              <div className={`flex items-center ${expense.paidOut ? 'paid-out' : ''}`}>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Avatar className="h-10 w-10 transition-transform duration-200 hover:ring-2 hover:ring-blue-500 hover:scale-105">
+                        {avatarUrl ? (
+                          <AvatarImage src={avatarUrl} alt="Avatar" />
+                        ) : (
+                          <AvatarFallback>
+                            {user.firstName.charAt(0)}
+                            {user.lastName.charAt(0)}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="text-sm font-medium">{user.firstName} {user.lastName}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <div className="ml-4 space-y-1">
+                  <p className={`text-sm font-medium leading-none ${expense.paidOut ? 'text-paid-out-green line-through' : 'text-white'}`}>{expense.title}</p>
+                  <p className={`text-sm ${expense.paidOut ? 'text-paid-out-green line-through' : 'text-gray-400'}`}>{expense.description}</p>
+                </div>
+                <div className="ml-auto flex flex-col items-end space-y-1">
+                  <div className={`font-medium ${expense.paidOut ? 'text-paid-out-green line-through' : 'text-white'}`}>${expense.totalCost.toFixed(2)}</div>
+                  <div className={`text-xs ${expense.paidOut ? 'text-paid-out-green line-through' : 'text-gray-400'}`}>{formatDate(expense.createdAt instanceof Timestamp ? expense.createdAt.toDate() : expense.createdAt)}</div>
+                  {expense.createdBy === uid && (
+                    <DotsVerticalIcon className="cursor-pointer" />
+                  )}
+                </div>
               </div>
-              <div className="ml-auto font-medium text-white">${expense.totalCost.toFixed(2)}</div>
-            </div>
-            {index < sortedExpenses.length - 1 && <Separator className="my-4" />}
-          </React.Fragment>
-        );
-      })}
-    </div>
+              {index < sortedExpenses.length - 1 && <Separator className="my-4" />}
+            </React.Fragment>
+          );
+        })}
+        {/* <CalculateExpenses expenses={expenses.filter(expense => !expense.paidOut)} users={users} avatarUrls={avatarUrls} /> */}
+      </div>
     </ScrollArea>
   );
 };
+       

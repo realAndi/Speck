@@ -42,6 +42,7 @@ export interface Expense {
   createdBy: string;
   createdAt?: Timestamp;
   user: User;
+  paidOut: boolean;
 }
 
 export interface User {

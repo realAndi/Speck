@@ -24,7 +24,7 @@ const config = {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        
+        'paid-out-green': '#10B981',
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -83,6 +83,11 @@ const config = {
         "swipe-right": "swipeRight 0.5s ease-out",
         "swipe-left": "swipeLeft 0.5s ease-out",
       },
+    },
+  },
+  variants: {
+    extend: {
+      textDecoration: ['paid-out'],
     },
   },
   plugins: [require("tailwindcss-animate")],

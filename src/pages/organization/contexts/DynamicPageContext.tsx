@@ -1,21 +1,21 @@
-import React from 'react';
+import React, { createContext, useContext, ReactNode, FC } from 'react';
 
 interface DynamicPageContextProps {
   uid: string | null;
 }
 
-export const DynamicPageContext = React.createContext<DynamicPageContextProps>({
+const DynamicPageContext = createContext<DynamicPageContextProps>({
   uid: null,
 });
 
-export const useDynamicPageContext = () => React.useContext(DynamicPageContext);
+export const useDynamicPageContext = () => useContext(DynamicPageContext);
 
 interface DynamicPageProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   uid: string | null;
 }
 
-export const DynamicPageProvider: React.FC<DynamicPageProviderProps> = ({ children, uid }) => {
+export const DynamicPageProvider: FC<DynamicPageProviderProps> = ({ children, uid }) => {
   return (
     <DynamicPageContext.Provider value={{ uid }}>
       {children}

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { RecentlyPurchased } from "./RecentlyPurchased";
 import { RecentlyPurchasedChart } from "./RecentlyPurchasedChart";
+import { CalculateExpenses } from "./dialogs/CalculateExpenses"; // Import the new component
 import { Expense } from "@/utils/types";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/utils/firebase/firebase-config"
@@ -93,7 +95,7 @@ export const OverviewSection: React.FC<OverviewSectionProps> = ({ expenses, orga
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-6 flex flex-col h-full">
             <RecentlyPurchased organizationId={organizationId} />
           </CardContent>
         </Card>
